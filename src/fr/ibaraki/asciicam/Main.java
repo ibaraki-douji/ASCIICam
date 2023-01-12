@@ -27,59 +27,64 @@ public class Main {
 				System.out.println(String.join("\n\n", VideoInputFrameGrabber.getDeviceDescriptions()));
 				return;
 			}
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		try {
-			Main.fps = Integer.parseInt(args[Arrays.asList(args).indexOf("--fps")+1]);
-		} catch (Exception e) {}
-		
+			Main.fps = Integer.parseInt(args[Arrays.asList(args).indexOf("--fps") + 1]);
+		} catch (Exception e) {
+		}
+
 		try {
-			Main.height = Integer.parseInt(args[Arrays.asList(args).indexOf("--height")+1]);
-		} catch (Exception e) {}
-		
+			Main.height = Integer.parseInt(args[Arrays.asList(args).indexOf("--height") + 1]);
+		} catch (Exception e) {
+		}
+
 		try {
-			Main.streamSource = Integer.parseInt(args[Arrays.asList(args).indexOf("--source")+1]);
-		} catch (Exception e) {}
-		
+			Main.streamSource = Integer.parseInt(args[Arrays.asList(args).indexOf("--source") + 1]);
+		} catch (Exception e) {
+		}
+
 		try {
-			Main.file = args[Arrays.asList(args).indexOf("--file")+1];
-			if (Arrays.asList(args).indexOf("--file") == -1) Main.file = null;
+			Main.file = args[Arrays.asList(args).indexOf("--file") + 1];
+			if (Arrays.asList(args).indexOf("--file") == -1)
+				Main.file = null;
 		} catch (Exception e) {
 			Main.file = null;
 		}
-		
+
 		if (Main.file != null) {
-			if (!(
-					Main.file.endsWith("jpg") ||
-					Main.file.endsWith("png") ||
-					Main.file.endsWith("jpeg")
-				)) {
+			if (!(Main.file.endsWith("jpg") || Main.file.endsWith("png") || Main.file.endsWith("jpeg"))) {
 				System.out.println("You can only use image for the file path");
 				return;
-			};
+			}
+			;
 			BufferedImage o = ImageIO.read(new File(Main.file));
-			BufferedImage i = Main.resize(o, (int)(Main.keepRatioForWidth(o.getWidth(), o.getHeight(), height)*(float)((float)5/(float)2)), Main.height);
+			BufferedImage i = Main.resize(o, (int) (Main.keepRatioForWidth(o.getWidth(), o.getHeight(), height)
+					* (float) ((float) 5 / (float) 2)), Main.height);
 			Main.process(i);
 			return;
 		}
-		
-		
+
 		FrameGrabber grabber = FrameGrabber.createDefault(Main.streamSource);
 		Java2DFrameConverter bimConverter = new Java2DFrameConverter();
 		grabber.setFormat("gdigrab");
 		grabber.setFrameRate(60);
 		grabber.start();
-        
+
 		new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				try {
 					while (true) {
 						Thread.sleep(1000 / Main.fps);
-						
+
 						Frame f = grabber.grab();
 						BufferedImage o = bimConverter.convert(f);
-						BufferedImage i = Main.resize(o, (int)(Main.keepRatioForWidth(o.getWidth(), o.getHeight(), height)*(float)((float)5/(float)2)), Main.height);
+						BufferedImage i = Main.resize(o,
+								(int) (Main.keepRatioForWidth(o.getWidth(), o.getHeight(), height)
+										* (float) ((float) 5 / (float) 2)),
+								Main.height);
 						Main.process(i);
 					}
 				} catch (Exception e) {
@@ -87,9 +92,9 @@ public class Main {
 				}
 			}
 		}).start();
-        
+
 	}
-	
+
 	public static void process(BufferedImage i) {
 		String end = "";
 		for (int y = 0; y < i.getHeight(); y++) {
@@ -102,28 +107,28 @@ public class Main {
 			}
 			end += "\n";
 		}
-		System.out.print(end.substring(0, end.length()-1));
+		System.out.print(end.substring(0, end.length() - 1));
 	}
-	
+
 	public static String getASCII(int r, int g, int b) {
-		int gray = (r+g+b)/3;
+		int gray = (r + g + b) / 3;
 		try {
 			return Main.ASCIIdic.split("")[(int) Math.floor(gray * Main.ASCIIdic.split("").length / 255)];
 		} catch (ArrayIndexOutOfBoundsException e) {
-			return Main.ASCIIdic.split("")[Main.ASCIIdic.split("").length-1];
+			return Main.ASCIIdic.split("")[Main.ASCIIdic.split("").length - 1];
 		}
 	}
-	
+
 	public static BufferedImage resize(BufferedImage img, int width, int height) {
 		BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-	    Graphics2D graphics2D = resizedImage.createGraphics();
-	    graphics2D.drawImage(img, 0, 0, width, height, null);
-	    graphics2D.dispose();
-	    return resizedImage;
+		Graphics2D graphics2D = resizedImage.createGraphics();
+		graphics2D.drawImage(img, 0, 0, width, height, null);
+		graphics2D.dispose();
+		return resizedImage;
 	}
-	
+
 	public static int keepRatioForWidth(int originalW, int originalH, int newH) {
-		return (int)(((float)((float)originalW / (float)originalH)) * newH);
+		return (int) (((float) ((float) originalW / (float) originalH)) * newH);
 	}
 
 }
